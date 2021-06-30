@@ -1,12 +1,3 @@
-//! Fast and easy queue abstraction.
-//!
-//! Provides an abstraction over a queue.  When the abstraction is used
-//! there are these advantages:
-//! - Fast
-//! - [`Easy`]
-//!
-//! [`Easy`]: http://thatwaseasy.example.com
-
 
 pub mod skip_list {
     pub mod node_link;
@@ -21,16 +12,6 @@ pub mod skip_list {
             SkipList { head : Link::new(Node::new_head()), }
         }
 
-        /// Adds one to the number given.
-        ///
-        /// # Examples
-        ///
-        /// ```
-        /// let arg = 5;
-        /// let answer = my_crate::add_one(arg);
-        ///
-        /// assert_eq!(6, answer);
-        /// ``
         pub fn insert(&mut self, elem: i32) {
             let new_node_link = &mut Link::new(Node::new(elem));
             let mut level = self.get_skip_count();
@@ -71,16 +52,6 @@ pub mod skip_list {
             target.splice_core_node(new_node_link);
         }
 
-        /// Adds one to the number given.
-        ///
-        /// # Examples
-        ///
-        /// ```
-        /// let arg = 5;
-        /// let answer = my_crate::add_one(arg);
-        ///
-        /// assert_eq!(6, answer);
-        /// ``
         pub fn delete(&mut self, elem: i32) {
             let mut level = self.get_skip_count();
             let mut search_skip = self.head.make_skip_link();
@@ -122,16 +93,6 @@ pub mod skip_list {
 
         }
 
-        /// Adds one to the number given.
-        ///
-        /// # Examples
-        ///
-        /// ```
-        /// let arg = 5;
-        /// let answer = my_crate::add_one(arg);
-        ///
-        /// assert_eq!(6, answer);
-        /// ``
         pub fn contains(&self, elem: i32) -> bool {
             let mut found = false;
 
