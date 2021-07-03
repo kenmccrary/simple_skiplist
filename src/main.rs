@@ -3,11 +3,19 @@ use simple_skiplist::skip_list::SkipList;
 fn main() {
     let mut skip_list = SkipList::new();
 
-    skip_list.insert(1);
-    skip_list.insert(2);
-    skip_list.insert(3);
-    skip_list.delete(3);
+    for insert in 1..=100 {
+        skip_list.insert(insert);
+    }
 
-    println!("UnExpected Found: {}", skip_list.contains(3));
+    for delete in 1..=100 {
+        skip_list.delete(delete);
+    }
+
+    if skip_list.is_empty() {
+        println!("empty as expected");
+    } else {
+       println!("error, not empty");
+    }
+
 
 }
