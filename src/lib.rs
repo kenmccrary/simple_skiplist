@@ -137,7 +137,9 @@ pub mod skip_list {
             return found;
         }
 
-
+        pub fn is_empty(&self) -> bool {
+            !self.head.next().is_some()
+        }
 
         fn set_skip(&mut self, skip_link: SkipLink, level: usize) {
             self.head.set_skip(skip_link, level)
@@ -161,8 +163,44 @@ pub mod skip_list {
 
 #[cfg(test)]
 mod tests {
+    use crate::skip_list::SkipList;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn ctor_test() {
+
+        let mut skip_list = SkipList::new();
+
+        assert_eq!(skip_list.is_empty(), true);
+    }
+
+    #[test]
+    fn insert_delete_one_test() {
+
+        let mut skip_list = SkipList::new();
+        skip_list.insert(1);
+        skip_list.delete(1);
+
+        assert_eq!(skip_list.is_empty(), true);
+    }
+
+    #[test]
+    fn invalid_delete_test() {
+
+        let mut skip_list = SkipList::new();
+        skip_list.delete(1);
+
+        assert_eq!(skip_list.is_empty(), true);
+    }
+
+    #[test]
+    fn insert_hundred_test() {
+
+        let mut skip_list = SkipList::new();
+
+        for i in 1..=100 {
+            skip_list.insert(i);
+        }
+
+        assert_eq!(skip_list.contains(100), true);
     }
 }
