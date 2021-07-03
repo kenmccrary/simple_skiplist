@@ -1,4 +1,4 @@
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
 use std::cmp::Ordering;
@@ -6,13 +6,11 @@ use std::mem;
 
 pub struct Node {
     elem: i32,
-    skip_links: Vec<SkipLink>,
+    skip_links: Vec<Link>,
     core_list: Link,
 }
 
 pub struct Link(Option<Rc<RefCell<Node>>>);
-pub struct SkipLink(Option<Weak<RefCell<Node>>>);
-
 const MAX_LEVEL: i32 = 10;
 
 // ----------------------------------------------------------------------------
@@ -26,28 +24,28 @@ impl Node {
             // if true {   // TEMP
             // This node will have SkipLinks of a random number up to MAX_LEVEL
             let mut target_height : usize = 1;
-            for height in 1..MAX_LEVEL {
+            for _ in 1..MAX_LEVEL {
                 if fastrand::bool() {
                     target_height = target_height + 1;
                 } else {
                     break;
                 }
             }
-            Node { elem: elem, core_list: Link::new_empty(), skip_links : vec![SkipLink::new_empty(); target_height as usize], }
+            Node { elem: elem, core_list: Link::new_empty(), skip_links : vec![Link::new_empty(); target_height as usize], }
         } else {
-            Node { elem: elem, core_list: Link::new_empty(), skip_links : vec![SkipLink::new_empty(); 0], }
+            Node { elem: elem, core_list: Link::new_empty(), skip_links : vec![Link::new_empty(); 0], }
         }
     }
 
     pub fn new_head() -> Self {
-        Node { elem: i32::MIN, core_list: Link::new_empty(), skip_links : vec![SkipLink::new_empty(); MAX_LEVEL as usize], }
+        Node { elem: i32::MIN, core_list: Link::new_empty(), skip_links : vec![Link::new_empty(); MAX_LEVEL as usize], }
     }
 
-    pub fn get_skip(&self, level: usize) -> SkipLink {
+    pub fn get_skip(&self, level: usize) -> Link {
         self.skip_links[level - 1].clone()
     }
 
-    pub fn set_skip(&mut self, skip_link : SkipLink, level : usize)  {
+    pub fn set_skip(&mut self, skip_link : Link, level : usize)  {
         self.skip_links[level - 1] = skip_link.clone();
     }
 
@@ -77,12 +75,12 @@ impl Node {
         self.core_list.clone()
     }
 
-    pub fn next_skip(&self, bounds: i32, level: usize) -> SkipLink {
+    pub fn next_skip(&self, bounds: i32, level: usize) -> Link {
         let skip = self.get_skip(level);
 
         if skip.is_some() {
             if skip.elem > bounds {
-                return SkipLink::new_empty();
+                return Link::new_empty();
             }
         }
 
@@ -93,11 +91,11 @@ impl Node {
         self.elem
     }
 
-    pub fn splice_skip_node(&mut self, new_node_link: &mut SkipLink, level: usize) {
+    pub fn splice_skip_node(&mut self, new_node_link: &mut Link, level: usize) {
 
         if self.get_skip(level).is_some() {
             let old_node = mem::replace(&mut self.skip_links[level - 1],
-                                        SkipLink::new_empty());
+                                        Link::new_empty());
             new_node_link.set_skip(old_node,level);
         }
 
@@ -105,7 +103,7 @@ impl Node {
     }
 
     pub fn remove_skip_node(&mut self, level: usize) {
-        let mut replace = SkipLink::new_empty();
+        let mut replace = Link::new_empty();
         let next = self.get_skip(level);
 
         if next.get_skip(level).is_some() {
@@ -178,15 +176,6 @@ impl Link {
         Link(None)
     }
 
-    pub fn make_skip_link(&self) -> SkipLink {
-        if let Some(rc) =  &self.0.clone() {
-            SkipLink(Some(Rc::downgrade(rc)))
-        } else {
-            SkipLink(None)
-        }
-
-    }
-
     pub fn is_some(&self) -> bool {
         self.0.is_some()
     }
@@ -234,72 +223,3 @@ impl DerefMut for Link {
     }
 }
 
-// ----------------------------------------------------------------------------
-// SkipLink
-// ----------------------------------------------------------------------------
-
-impl SkipLink {
-    pub fn new(node: Node) -> SkipLink {
-        let link = Link::new(node);
-        link.make_skip_link()
-    }
-
-    pub fn new_empty() -> SkipLink {
-        SkipLink(None)
-    }
-
-
-    pub fn upgrade(&self) -> Link {
-        let step1 = self.0.clone().unwrap();
-        Link::new_from_rc(Weak::upgrade(&step1).unwrap())
-    }
-
-    pub fn is_some(&self) -> bool {
-        self.0.is_some()
-    }
-}
-
-impl Clone for SkipLink {
-    fn clone(&self) -> Self {
-        if let Some(weak) = &self.0 {
-            SkipLink(Some(Weak::clone(weak)))
-        } else {
-            SkipLink(None)
-        }
-    }
-}
-
-impl Deref for SkipLink {
-    type Target = Node;
-
-    fn deref(&self) -> &Node {
-
-        if let Some(n1) = &self.0 {
-            let n2 = n1.upgrade().unwrap().clone();
-            unsafe { // wth
-                let n3 = n2.as_ptr();
-                let n4 = &*n3;
-                n4
-            }
-        } else {
-            panic!("this is a terrible mistake!");
-        }
-    }
-}
-
-impl DerefMut for SkipLink {
-
-    fn deref_mut(&mut self) -> &mut Node {
-        if let Some(n1) = &self.0 {
-            let n2 = n1.upgrade().unwrap().clone();
-
-            unsafe { // wth
-                let n3 = n2.as_ptr();
-                let n4 = &mut *n3;
-                n4
-            }
-        } else {
-            panic!("this is a terrible mistake!");
-        }
-    }
-}

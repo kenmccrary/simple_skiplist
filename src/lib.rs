@@ -1,7 +1,7 @@
 
 pub mod skip_list {
     pub mod node_link;
-    use crate::skip_list::node_link::{Link, Node, SkipLink};
+    use crate::skip_list::node_link::{Link, Node};
 
     pub struct SkipList{
         head : Link,
@@ -18,11 +18,11 @@ pub mod skip_list {
 
             // Increase the height of the list as necessary
             for level in self.get_skip_count() + 1..=new_node_link.get_skip_height(){
-                self.set_skip(new_node_link.make_skip_link(), level)
+                self.set_skip(new_node_link.clone(), level)
             }
 
             // start at the head node
-            let mut target_skip = self.head.clone().make_skip_link();
+            let mut target_skip = self.head.clone();
 
             while level >= 1 {
 
@@ -34,7 +34,7 @@ pub mod skip_list {
                 } else {
                     // splice skip link
                     if new_node_link.get_skip_height() >= level {
-                        target_skip.splice_skip_node(&mut new_node_link.make_skip_link(), level);
+                        target_skip.splice_skip_node(&mut new_node_link.clone(), level);
                     }
 
                     // move down
@@ -45,16 +45,16 @@ pub mod skip_list {
             // iterate over core list
             while target_skip.next().is_some() &&
                 target_skip.next().get_elem() < elem {
-                target_skip = target_skip.next().make_skip_link();
+                target_skip = target_skip.next().clone();
             }
 
-            let mut target = target_skip.upgrade();
-            target.splice_core_node(new_node_link);
+            //let mut target = target_skip.upgrade();
+            target_skip.splice_core_node(new_node_link);
         }
 
         pub fn delete(&mut self, elem: i32) {
             let mut level = self.get_skip_count();
-            let mut search_skip = self.head.make_skip_link();
+            let mut search_skip = self.head.clone();
 
             // remove the skip links
 
@@ -82,7 +82,7 @@ pub mod skip_list {
 
             while search_skip.next().is_some() {
                 if search_skip.next().get_elem() < elem {
-                    search_skip = search_skip.next().make_skip_link();
+                    search_skip = search_skip.next().clone();
                 } else {
                     if search_skip.next().get_elem() == elem {
                         search_skip.remove_core_node();
@@ -97,7 +97,7 @@ pub mod skip_list {
             let mut found = false;
 
             let mut level = self.get_skip_count();
-            let mut search_skip = self.head.make_skip_link();
+            let mut search_skip = self.head.clone();
 
             while level >= 1 {
                 if search_skip.get_skip(level).is_some() {
@@ -125,7 +125,7 @@ pub mod skip_list {
             // search the core list
             while !found && search_skip.next().is_some() {
                 if search_skip.next().get_elem() < elem {
-                    search_skip = search_skip.next().make_skip_link();
+                    search_skip = search_skip.next().clone();
                 } else {
                     if search_skip.next().get_elem() == elem {
                         found = true;
@@ -141,11 +141,11 @@ pub mod skip_list {
             !self.head.next().is_some()
         }
 
-        fn set_skip(&mut self, skip_link: SkipLink, level: usize) {
+        fn set_skip(&mut self, skip_link: Link, level: usize) {
             self.head.set_skip(skip_link, level)
         }
 
-        fn get_skip(&self, level: usize) -> SkipLink {
+        fn get_skip(&self, level: usize) -> Link {
             self.head.get_skip(level)
         }
 
