@@ -20,8 +20,6 @@ const MAX_LEVEL: i32 = 10;
 impl Node {
     pub fn new(elem: i32) -> Self {
         if fastrand::bool() {
-            //if false {   // TEMP
-            // if true {   // TEMP
             // This node will have SkipLinks of a random number up to MAX_LEVEL
             let mut target_height : usize = 1;
             for _ in 1..MAX_LEVEL {
