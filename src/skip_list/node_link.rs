@@ -11,7 +11,6 @@ pub struct Node {
 }
 
 pub struct Link(Option<Rc<RefCell<Node>>>);
-const MAX_LEVEL: i32 = 10;
 
 // ----------------------------------------------------------------------------
 // Node
@@ -22,7 +21,7 @@ impl Node {
         if fastrand::bool() {
             // This node will have SkipLinks of a random number up to MAX_LEVEL
             let mut target_height : usize = 1;
-            for _ in 1..MAX_LEVEL {
+            for _ in 1..crate::MAX_LEVEL {
                 if fastrand::bool() {
                     target_height = target_height + 1;
                 } else {
@@ -36,7 +35,7 @@ impl Node {
     }
 
     pub fn new_head() -> Self {
-        Node { elem: i32::MIN, core_list: Link::new_empty(), skip_links : vec![Link::new_empty(); MAX_LEVEL as usize], }
+        Node { elem: i32::MIN, core_list: Link::new_empty(), skip_links : vec![Link::new_empty(); crate::MAX_LEVEL as usize], }
     }
 
     pub fn get_skip(&self, level: usize) -> Link {

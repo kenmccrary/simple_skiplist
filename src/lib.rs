@@ -1,3 +1,4 @@
+const MAX_LEVEL : i32 = 10;
 
 pub mod skip_list {
     pub mod node_link;
